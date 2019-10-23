@@ -95,6 +95,10 @@ func (wxa *MiniProgram) decrypt(sessionKey, encryptedData, iv string) ([]byte, e
 	return cipherText, nil
 }
 
+func (wxa *MiniProgram) CipherText(sessionKey, encryptedData, iv string) ([]byte, error) {
+	return wxa.decrypt(sessionKey, encryptedData, iv)
+}
+
 // Decrypt 解密手机号
 func (wxa *MiniProgram) DecryptPhone(sessionKey, encryptedData, iv string) (*Phone, error) {
 	cipherText, err := wxa.decrypt(sessionKey, encryptedData, iv)
