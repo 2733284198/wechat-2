@@ -119,7 +119,7 @@ func (srv *Server) getMessage() (interface{}, error) {
 	if srv.isSafeMode {
 		var encryptedXMLMsg message.EncryptedXMLMsg
 		if err := xml.NewDecoder(srv.Request.Body).Decode(&encryptedXMLMsg); err != nil {
-			return nil, fmt.Errorf("从body中解析xml失败,err=%v", err)
+			return nil, fmt.Errorf("从body中解析xml失败,err=%v, encryptedXMLMsg=%+v", err, encryptedXMLMsg)
 		}
 
 		//验证消息签名
