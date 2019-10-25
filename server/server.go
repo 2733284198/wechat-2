@@ -2,8 +2,8 @@ package server
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
+	errors2 "github.com/pkg/errors"
 	"io/ioutil"
 	"reflect"
 	"runtime/debug"
@@ -50,7 +50,7 @@ func (srv *Server) SetDebug(debug bool) {
 //Serve 处理微信的请求消息
 func (srv *Server) Serve() error {
 	if !srv.Validate() {
-		return fmt.Errorf("请求校验失败")
+		return errors2.New("请求校验失败")
 	}
 
 	echostr, exists := srv.GetQuery("echostr")
@@ -65,7 +65,7 @@ func (srv *Server) Serve() error {
 	}
 
 	//debug
-	//fmt.Println("request msg = ", string(srv.requestRawXMLMsg))
+	fmt.Println("request msg = ", string(srv.requestRawXMLMsg))
 
 	return srv.buildResponse(response)
 }
@@ -82,7 +82,7 @@ func (srv *Server) Validate() bool {
 }
 
 //HandleRequest 处理微信的请求
-func (srv *Server) handleRequest() (reply *message.Reply, err error) {
+func (srv *Server) handleRequest() (*message.Reply, error) {
 	//set isSafeMode
 	srv.isSafeMode = false
 	encryptType := srv.Query("encrypt_type")
@@ -94,17 +94,18 @@ func (srv *Server) handleRequest() (reply *message.Reply, err error) {
 	srv.openID = srv.Query("openid")
 
 	var msg interface{}
-	msg, err = srv.getMessage()
+	msg, err := srv.getMessage()
 	if err != nil {
-		return
+		return nil, err
 	}
 	mixMessage, success := msg.(message.MixMessage)
 	if !success {
-		err = errors.New("消息类型转换失败")
+		err = errors2.New("消息类型转换失败")
+		return nil, err
 	}
 	srv.requestMsg = mixMessage
-	reply = srv.messageHandler(mixMessage)
-	return
+	reply := srv.messageHandler(mixMessage)
+	return reply, err
 }
 
 //GetOpenID return openID
